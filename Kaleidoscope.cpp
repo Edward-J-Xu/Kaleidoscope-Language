@@ -194,6 +194,11 @@ static std::unique_ptr<ExprAST> ParseNumberExpr() {
   return std::move(Result);
 }
 
+/// expression
+///   ::= primary binoprhs
+///
+static std::unique_ptr<ExprAST> ParseExpression();
+
 /// parenexpr ::= '(' expression ')'
 static std::unique_ptr<ExprAST> ParseParenExpr() {
   getNextToken(); // eat (.
