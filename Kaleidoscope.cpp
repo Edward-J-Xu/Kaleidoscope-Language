@@ -463,135 +463,135 @@ Value *CallExprAST::codegen() {
   return Builder->CreateCall(CalleeF, ArgsV, "calltmp");
 }
 
-Function *PrototypeAST::codegen() {
-  // Make the function type:  double(double,double) etc.
-  std::vector<Type *> Doubles(Args.size(), Type::getDoubleTy(*TheContext));
-  FunctionType *FT =
-      FunctionType::get(Type::getDoubleTy(*TheContext), Doubles, false);
+// Function *PrototypeAST::codegen() {
+//   // Make the function type:  double(double,double) etc.
+//   std::vector<Type *> Doubles(Args.size(), Type::getDoubleTy(*TheContext));
+//   FunctionType *FT =
+//       FunctionType::get(Type::getDoubleTy(*TheContext), Doubles, false);
 
-  Function *F =
-      Function::Create(FT, Function::ExternalLinkage, Name, TheModule.get());
+//   Function *F =
+//       Function::Create(FT, Function::ExternalLinkage, Name, TheModule.get());
 
-  // Set names for all arguments.
-  unsigned Idx = 0;
-  for (auto &Arg : F->args())
-    Arg.setName(Args[Idx++]);
+//   // Set names for all arguments.
+//   unsigned Idx = 0;
+//   for (auto &Arg : F->args())
+//     Arg.setName(Args[Idx++]);
 
-  return F;
-}
+//   return F;
+// }
 
-Function *FunctionAST::codegen() {
-  // First, check for an existing function from a previous 'extern' declaration.
-  Function *TheFunction = TheModule->getFunction(Proto->getName());
+// Function *FunctionAST::codegen() {
+//   // First, check for an existing function from a previous 'extern' declaration.
+//   Function *TheFunction = TheModule->getFunction(Proto->getName());
 
-  if (!TheFunction)
-    TheFunction = Proto->codegen();
+//   if (!TheFunction)
+//     TheFunction = Proto->codegen();
 
-  if (!TheFunction)
-    return nullptr;
+//   if (!TheFunction)
+//     return nullptr;
 
-  // Create a new basic block to start insertion into.
-  BasicBlock *BB = BasicBlock::Create(*TheContext, "entry", TheFunction);
-  Builder->SetInsertPoint(BB);
+//   // Create a new basic block to start insertion into.
+//   BasicBlock *BB = BasicBlock::Create(*TheContext, "entry", TheFunction);
+//   Builder->SetInsertPoint(BB);
 
-  // Record the function arguments in the NamedValues map.
-  NamedValues.clear();
-  for (auto &Arg : TheFunction->args())
-    NamedValues[std::string(Arg.getName())] = &Arg;
+//   // Record the function arguments in the NamedValues map.
+//   NamedValues.clear();
+//   for (auto &Arg : TheFunction->args())
+//     NamedValues[std::string(Arg.getName())] = &Arg;
 
-  if (Value *RetVal = Body->codegen()) {
-    // Finish off the function.
-    Builder->CreateRet(RetVal);
+//   if (Value *RetVal = Body->codegen()) {
+//     // Finish off the function.
+//     Builder->CreateRet(RetVal);
 
-    // Validate the generated code, checking for consistency.
-    verifyFunction(*TheFunction);
+//     // Validate the generated code, checking for consistency.
+//     verifyFunction(*TheFunction);
 
-    return TheFunction;
-  }
+//     return TheFunction;
+//   }
 
-  // Error reading body, remove function.
-  TheFunction->eraseFromParent();
-  return nullptr;
-}
+//   // Error reading body, remove function.
+//   TheFunction->eraseFromParent();
+//   return nullptr;
+// }
 
-//===----------------------------------------------------------------------===//
-// Top-Level parsing and JIT Driver
-//===----------------------------------------------------------------------===//
+// //===----------------------------------------------------------------------===//
+// // Top-Level parsing and JIT Driver
+// //===----------------------------------------------------------------------===//
 
-static void InitializeModule() {
-  // Open a new context and module.
-  TheContext = std::make_unique<LLVMContext>();
-  TheModule = std::make_unique<Module>("my cool jit", *TheContext);
+// static void InitializeModule() {
+//   // Open a new context and module.
+//   TheContext = std::make_unique<LLVMContext>();
+//   TheModule = std::make_unique<Module>("my cool jit", *TheContext);
 
-  // Create a new builder for the module.
-  Builder = std::make_unique<IRBuilder<>>(*TheContext);
-}
+//   // Create a new builder for the module.
+//   Builder = std::make_unique<IRBuilder<>>(*TheContext);
+// }
 
-static void HandleDefinition() {
-  if (auto FnAST = ParseDefinition()) {
-    if (auto *FnIR = FnAST->codegen()) {
-      fprintf(stderr, "Read function definition:");
-      FnIR->print(errs());
-      fprintf(stderr, "\n");
-    }
-  } else {
-    // Skip token for error recovery.
-    getNextToken();
-  }
-}
+// static void HandleDefinition() {
+//   if (auto FnAST = ParseDefinition()) {
+//     if (auto *FnIR = FnAST->codegen()) {
+//       fprintf(stderr, "Read function definition:");
+//       FnIR->print(errs());
+//       fprintf(stderr, "\n");
+//     }
+//   } else {
+//     // Skip token for error recovery.
+//     getNextToken();
+//   }
+// }
 
-static void HandleExtern() {
-  if (auto ProtoAST = ParseExtern()) {
-    if (auto *FnIR = ProtoAST->codegen()) {
-      fprintf(stderr, "Read extern: ");
-      FnIR->print(errs());
-      fprintf(stderr, "\n");
-    }
-  } else {
-    // Skip token for error recovery.
-    getNextToken();
-  }
-}
+// static void HandleExtern() {
+//   if (auto ProtoAST = ParseExtern()) {
+//     if (auto *FnIR = ProtoAST->codegen()) {
+//       fprintf(stderr, "Read extern: ");
+//       FnIR->print(errs());
+//       fprintf(stderr, "\n");
+//     }
+//   } else {
+//     // Skip token for error recovery.
+//     getNextToken();
+//   }
+// }
 
-static void HandleTopLevelExpression() {
-  // Evaluate a top-level expression into an anonymous function.
-  if (auto FnAST = ParseTopLevelExpr()) {
-    if (auto *FnIR = FnAST->codegen()) {
-      fprintf(stderr, "Read top-level expression:");
-      FnIR->print(errs());
-      fprintf(stderr, "\n");
+// static void HandleTopLevelExpression() {
+//   // Evaluate a top-level expression into an anonymous function.
+//   if (auto FnAST = ParseTopLevelExpr()) {
+//     if (auto *FnIR = FnAST->codegen()) {
+//       fprintf(stderr, "Read top-level expression:");
+//       FnIR->print(errs());
+//       fprintf(stderr, "\n");
 
-      // Remove the anonymous expression.
-      FnIR->eraseFromParent();
-    }
-  } else {
-    // Skip token for error recovery.
-    getNextToken();
-  }
-}
+//       // Remove the anonymous expression.
+//       FnIR->eraseFromParent();
+//     }
+//   } else {
+//     // Skip token for error recovery.
+//     getNextToken();
+//   }
+// }
 
-/// top ::= definition | external | expression | ';'
-static void MainLoop() {
-  while (true) {
-    fprintf(stderr, "ready> ");
-    switch (CurTok) {
-    case tok_eof:
-      return;
-    case ';': // ignore top-level semicolons.
-      getNextToken();
-      break;
-    case tok_def:
-      HandleDefinition();
-      break;
-    case tok_extern:
-      HandleExtern();
-      break;
-    default:
-      HandleTopLevelExpression();
-      break;
-    }
-  }
-}
+// /// top ::= definition | external | expression | ';'
+// static void MainLoop() {
+//   while (true) {
+//     fprintf(stderr, "ready> ");
+//     switch (CurTok) {
+//     case tok_eof:
+//       return;
+//     case ';': // ignore top-level semicolons.
+//       getNextToken();
+//       break;
+//     case tok_def:
+//       HandleDefinition();
+//       break;
+//     case tok_extern:
+//       HandleExtern();
+//       break;
+//     default:
+//       HandleTopLevelExpression();
+//       break;
+//     }
+//   }
+// }
 
 //===----------------------------------------------------------------------===//
 // Main driver code.
