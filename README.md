@@ -1,2 +1,2 @@
-# My-First-Language-Frontend-with-LLVM
+# Language Frontend with LLVM and MLIR
 A simple “Kaleidoscope” language
