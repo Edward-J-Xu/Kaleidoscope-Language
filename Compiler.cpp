@@ -13,6 +13,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 using namespace toy;
+
 namespace cl = llvm::cl;
 
 static cl::opt<std::string> inputFilename(cl::Positional,
